@@ -13,12 +13,8 @@ def relu(x):
     Return:
     s -- relu(x)
     """
-    ####################
-    # your answer here
-    ####################
 
-    raise NotImplementedError
-    # END YOUR CODE
+    s = np.maximum(0,x)
 
     return s
 
@@ -35,12 +31,8 @@ def relu_grad(s):
     Return:
     ds -- Your computed gradient.
     """
-    ####################
-    # your answer here
-    ####################
 
-    raise NotImplementedError
-    # END YOUR CODE
+    ds = np.heaviside(s, 0)
 
     return ds
 
@@ -50,21 +42,21 @@ def test_relu_basic():
     Some simple tests to get you started.
     Warning: these are not exhaustive.
     """
-    print "Running basic tests..."
+    print("Running basic tests...")
     x = np.array([[1, 2], [-1, -2]])
     f = relu(x)
     g = relu_grad(f)
-    print f
+    print(f)
     f_ans = np.array([
         [1, 2],
         [0, 0]])
     assert np.allclose(f, f_ans, rtol=1e-05, atol=1e-06)
-    print g
+    print(g)
     g_ans = np.array([
         [1, 1],
         [0, 0]])
     assert np.allclose(g, g_ans, rtol=1e-05, atol=1e-06)
-    print "You should verify these results by hand!\n"
+    print("You should verify these results by hand!\n")
 
 
 def test_relu():
@@ -77,7 +69,7 @@ def test_relu():
     ####################
     # your answer here
     ####################
-    print "Running your tests..."
+    print("Running your tests...")
 
     # END YOUR CODE
 
