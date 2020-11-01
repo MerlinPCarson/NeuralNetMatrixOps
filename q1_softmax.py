@@ -44,7 +44,7 @@ def softmax(x):
 
         # perform softmax by row
         x = np.exp(x)
-        x /= x.sum(axis=1)
+        x /= x.sum(axis=1).reshape(-1,1)
 
     else:
         # Vector

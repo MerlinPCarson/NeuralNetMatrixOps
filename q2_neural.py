@@ -40,21 +40,30 @@ def forward_backward_prop(data, labels, params, dimensions, activation='sigmoid'
     ofs += H * Dy
     b2 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
 
-    # YOUR CODE HERE: forward propagation
+    # FOWARD PASS
+    # calculate signal at hidden layer 
+    z1 = data.dot(W1) + b1
+    #print(z1[0,-1],z1[1,-1])
+    #z1 += b1
+    #print(z1[0,-1]-b1[0,-1], z1[1,-1]-b1[0,-1])
+    # calculate ouput of hidden layer 
+    a1 = sigmoid(z1)
 
-    raise NotImplementedError
-    # END YOUR CODE
+    # calculate signal at output layer
+    z2 = a1.dot(W2) + b2
+    a2 = softmax(z2)
 
-    # YOUR CODE HERE: backward propagation
 
-    raise NotImplementedError
+    # BACKWARD PASS
+    cost = CE(labels, a2)
+
     # END YOUR CODE
     assert W1.shape == gradW1.shape
     assert W2.shape == gradW2.shape
-    assert W3.shape == gradW3.shape
+#    assert W3.shape == gradW3.shape
     assert b1.shape == gradb1.shape
     assert b2.shape == gradb2.shape
-    assert b3.shape == gradb3.shape
+#    assert b3.shape == gradb3.shape
 
     # Stack gradients (do not modify)
     grad = np.concatenate((gradW1.flatten(), gradb1.flatten(),
@@ -74,7 +83,7 @@ def sanity_check():
     dimensions = [10, 5, 10]
     data = np.random.randn(N, dimensions[0])   # each row will be a datum
     labels = np.zeros((N, dimensions[2]))
-    for i in xrange(N):
+    for i in range(N):
         labels[i, random.randint(0, dimensions[2]-1)] = 1
 
     params = np.random.randn((dimensions[0] + 1) * dimensions[1] + (
@@ -91,7 +100,7 @@ def your_sanity_checks():
     This function will not be called by the autograder, nor will
     your additional tests be graded.
     """
-    print "Running your sanity checks..."
+    print("Running your sanity checks...")
     # YOUR CODE HERE
 
     # raise NotImplementedError
