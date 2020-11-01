@@ -41,11 +41,10 @@ def forward_backward_prop(data, labels, params, dimensions, activation='sigmoid'
     b2 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
 
     # FOWARD PASS
+
     # calculate signal at hidden layer 
     z1 = data.dot(W1) + b1
-    #print(z1[0,-1],z1[1,-1])
-    #z1 += b1
-    #print(z1[0,-1]-b1[0,-1], z1[1,-1]-b1[0,-1])
+
     # calculate ouput of hidden layer 
     a1 = sigmoid(z1)
 
@@ -53,11 +52,27 @@ def forward_backward_prop(data, labels, params, dimensions, activation='sigmoid'
     z2 = a1.dot(W2) + b2
     a2 = softmax(z2)
 
-
-    # BACKWARD PASS
+    # error on from forward pass
     cost = CE(labels, a2)
 
-    # END YOUR CODE
+    # BACKWARD PASS
+
+    # gradient of weights at output layer
+    delta2 = a2 - labels
+    gradW2 = a1.T.dot(delta2)
+    gradb2 = np.sum(delta2, axis=0, keepdims=True)
+
+    # gradient of weights at hidden layer
+    delta1 = delta2.dot(W2.T) * sigmoid_grad(z1)
+    gradW1 = data.T.dot(delta1)
+    gradb1 = np.sum(delta1, axis=0, keepdims=True)
+
+    # update weights 
+    W1 -= gradW1
+    b1 -= gradb1
+    W2 -= gradW2
+    b2 -= gradb2
+
     assert W1.shape == gradW1.shape
     assert W2.shape == gradW2.shape
 #    assert W3.shape == gradW3.shape
