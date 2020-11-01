@@ -39,16 +39,20 @@ def softmax(x):
         # find max value of each row
         max_vals = np.amax(x, axis=1)
 
-        # subtract max vals of each row from each element of its row
+        # subtract max val of each row from each element of its row (for numerical stability)
         x = (x.T-max_vals).T
+
+        # perform softmax by row
         x = np.exp(x)
         x /= x.sum(axis=1)
 
     else:
         # Vector
 
+        # find max value of row
         max_val = np.max(x)
 
+        # perform softmax with constant shift for numerical stability
         x = np.exp(x-max_val)
         x /= x.sum()
 
