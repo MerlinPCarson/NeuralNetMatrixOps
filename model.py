@@ -5,7 +5,13 @@ from q1_softmax import softmax
 from q2_sigmoid import sigmoid, sigmoid_grad
 from q2_relu import relu, relu_grad
 from q2_neural import forward_backward_prop, CE
-    
+
+
+def one_hot_encode(labels):
+    num_labels = len(np.unique(labels))
+    encoding = np.eye(num_labels)[labels.astype('uint8')]
+    return encoding
+
 class ProgressBar(tqdm):
 
     def update_progress(self, block_num=1, block_size=1, total_size=None):
@@ -55,8 +61,6 @@ class Model():
         ofs += H * Dy
         b2 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
 
-        num_examples = data.shape[0]
-
         # FOWARD PASS
 
         # calculate signal at hidden layer 
@@ -77,11 +81,20 @@ class Model():
 
         return cost, a2
 
-    # BACKWARD PASS
-        pass
-
     def backward(self):
         pass
+
+    def evaluate(self, X, y):
+
+        # get model predictions
+        _, outputs = self.forward(X, y, self.weights, self.dimensions, self.activation)
+        preds = np.argmax(outputs, axis=1)
+
+        # determine accuracy of predictions
+        preds_enc = one_hot_encode(preds)
+        compare = [preds_enc[i,0]==y[i,0] and preds_enc[i,1]==y[i,1] for i in range(y.shape[0])]
+        accuracy = np.sum(compare)/outputs.shape[0]
+        return accuracy
 
     def fit(self, X_train, y_train, X_val, y_val, num_epochs, paitience=None):
 

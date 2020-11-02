@@ -2,7 +2,7 @@ import sys
 import time
 import numpy as np
 
-from model import Model
+from model import Model, one_hot_encode
 
 
 def one_hot_encode(labels):
@@ -42,6 +42,11 @@ def main():
     lr_rate = 0.01
     model = Model(dimensions, lr_rate, activation='relu')
     history = model.fit(X_train, y_train, X_val, y_val, num_epochs, paitience=paitience)
+
+    train_acc = model.evaluate(X_train, y_train)
+    val_acc = model.evaluate(X_val, y_val)
+
+    print(f'Training accuracy: {train_acc:.4f}, Validation accuracy: {val_acc:.4f}')
 
     print(f'Script completed in {time.time()-start:.2f} secs')
 
