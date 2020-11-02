@@ -36,12 +36,12 @@ def main():
     X_train, y_train = load_SPECT_data(train_path)
     X_val, y_val = load_SPECT_data(val_path)
 
-    dimensions = [X_train.shape[1], 500, 2]
-    num_epochs = 50000
-    paitience = 20 
+    dimensions = [X_train.shape[1], 10, 2]
+    num_epochs = 500
+    paitience = 10 
     lr_rate = 0.01
     model = Model(dimensions, lr_rate, activation='relu')
-    model.fit(X_train, y_train, X_val, y_val, num_epochs, paitience=paitience)
+    history = model.fit(X_train, y_train, X_val, y_val, num_epochs, paitience=paitience)
 
     print(f'Script completed in {time.time()-start:.2f} secs')
 

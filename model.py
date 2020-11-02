@@ -4,7 +4,7 @@ from tqdm import tqdm
 from q1_softmax import softmax
 from q2_sigmoid import sigmoid, sigmoid_grad
 from q2_relu import relu, relu_grad
-from q2_neural import forward_backward_prop
+from q2_neural import forward_backward_prop, CE
     
 class ProgressBar(tqdm):
 
@@ -29,7 +29,55 @@ class Model():
             self.weights = np.concatenate((self.weights, weights[layer].flatten()))
 
 
-    def forward(self):
+    def forward(self, data, labels, params, dimensions, activation='sigmoid'):
+        """
+        Forward propagation for a two-layer sigmoidal or ReLU network
+
+        Compute the forward propagation and for the cross entropy cost,
+
+        Arguments:
+        data -- M x Dx matrix, where each row is a training example.
+        labels -- M x Dy matrix, where each row is a one-hot vector.
+        params -- Model parameters, these are unpacked for you.
+        dimensions -- A tuple of input dimension, number of hidden units
+                      and output dimension
+        """
+
+        # Unpack network parameters (do not modify)
+        ofs = 0
+        Dx, H, Dy = (dimensions[0], dimensions[1], dimensions[2])
+
+        W1 = np.reshape(params[ofs:ofs + Dx * H], (Dx, H))
+        ofs += Dx * H
+        b1 = np.reshape(params[ofs:ofs + H], (1, H))
+        ofs += H
+        W2 = np.reshape(params[ofs:ofs + H * Dy], (H, Dy))
+        ofs += H * Dy
+        b2 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
+
+        num_examples = data.shape[0]
+
+        # FOWARD PASS
+
+        # calculate signal at hidden layer 
+        z1 = data.dot(W1) + b1
+
+        # calculate ouput of hidden layer 
+        if activation == 'sigmoid':
+            a1 = sigmoid(z1)
+        elif activation == 'relu':
+            a1 = relu(z1)
+
+        # calculate signal at output layer
+        z2 = a1.dot(W2) + b2
+        a2 = softmax(z2)
+
+        # error on from forward pass
+        cost = CE(labels, a2)
+
+        return cost, a2
+
+    # BACKWARD PASS
         pass
 
     def backward(self):
@@ -37,24 +85,33 @@ class Model():
 
     def fit(self, X_train, y_train, X_val, y_val, num_epochs, paitience=None):
 
-        best_loss = 999
+        history = {'loss': [], 'val_loss': []}
+        best_val_loss = 999
+        best_epoch = 0
         epochs_since_val_decrease = 0
+        order = np.arange(0, X_train.shape[0], 1)
         for epoch in range(num_epochs):
-            loss, _ = forward_backward_prop(X_train, y_train, self.weights, self.dimensions, self.activation)
-            val_loss, _ = forward_backward_prop(X_val, y_val, self.weights, self.dimensions, self.activation)
+            np.random.shuffle(order)
+            loss, _ = forward_backward_prop(X_train[order], y_train[order], self.weights, self.dimensions, self.activation)
+            val_loss, _ = self.forward(X_val, y_val, self.weights, self.dimensions, self.activation)
+            history['loss'].append(loss)
+            history['val_loss'].append(val_loss)
             print(f'Epoch[{epoch+1}/{num_epochs}]: loss = {loss}, val loss = {val_loss}')
 
+            # save weights with lowest validation loss
+            if best_val_loss > val_loss:
+                best_val_loss = val_loss
+                best_epoch = epoch
+                epochs_since_val_decrease = 0
+                self.best_weights = self.weights
+
+            # check for early stopping
             if paitience is not None:
-                # check for early stopping
-                if best_loss > val_loss:
-                    best_loss = val_loss
-                    epochs_since_val_decrease = 0
-                    self.best_weights = self.weights
-                else:
-                    epochs_since_val_decrease += 1
-                    if epochs_since_val_decrease >= paitience:
-                        print(f'Validation has not decreased in {epochs_since_val_decrease}: triggering early stopping.')
-                        break
+                epochs_since_val_decrease += 1
+                if epochs_since_val_decrease >= paitience:
+                    print(f'Validation has not decreased in {epochs_since_val_decrease}: triggering early stopping.')
+                    break
         
-            
+        print(f'Training complete: lowest validation was {best_val_loss} at epoch {best_epoch}')
+        return history
 
