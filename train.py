@@ -1,6 +1,7 @@
 import sys
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 from model import Model, one_hot_encode
 
@@ -27,8 +28,25 @@ def load_SPECT_data(path):
 
     return features, labels
 
+def plot_history(history):
+
+    epochs = np.arange(1, len(history['loss'])+1, 1)
+
+    plt.plot(epochs, history['loss'], label='Training')
+    plt.plot(epochs, history['val_loss'], label='Validation')
+
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.grid()
+    plt.tight_layout()
+    plt.show()
+
 def main():
     start = time.time()
+
+    # seed number generator for experiment reproducability
+    np.random.seed(42)
 
     train_path = 'data/SPECTF.train'
     val_path = 'data/SPECTF.test'
@@ -37,17 +55,20 @@ def main():
     X_val, y_val = load_SPECT_data(val_path)
 
     dimensions = [X_train.shape[1], 50, 2]
-    num_epochs = 500
+    num_epochs = 100 
     paitience = 10 
-    #paitience = None 
+    paitience = None 
     lr_rate = 0.01
+    mb_size = 16 
     model = Model(dimensions, lr_rate, activation='relu')
-    history = model.fit(X_train, y_train, X_val, y_val, num_epochs, paitience=paitience)
+    history = model.fit(X_train, y_train, X_val, y_val, num_epochs, mb_size, paitience=paitience)
 
+    # determine accuracies for data sets
     train_acc = model.evaluate(X_train, y_train)
     val_acc = model.evaluate(X_val, y_val)
-
     print(f'Training accuracy: {train_acc:.4f}, Validation accuracy: {val_acc:.4f}')
+
+    plot_history(history)
 
     print(f'Script completed in {time.time()-start:.2f} secs')
 

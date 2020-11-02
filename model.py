@@ -1,5 +1,6 @@
 import numpy as np
 from tqdm import tqdm
+from math import ceil
 
 from q1_softmax import softmax
 from q2_sigmoid import sigmoid, sigmoid_grad
@@ -95,20 +96,39 @@ class Model():
         accuracy = np.sum(compare)/outputs.shape[0]
         return accuracy
 
-    def fit(self, X_train, y_train, X_val, y_val, num_epochs, paitience=None):
+    def fit(self, X_train, y_train, X_val, y_val, num_epochs, mb_size, paitience=None):
 
         history = {'loss': [], 'val_loss': []}
         best_val_loss = 999
         best_epoch = 0
         epochs_since_val_decrease = 0
         order = np.arange(0, X_train.shape[0], 1)
+        num_batches = ceil(X_train.shape[0]/mb_size)
+
+        # main training loop
         for epoch in range(num_epochs):
+            epoch_loss = 0.0
+
+            # shuffle training data 
             np.random.shuffle(order)
-            loss, _ = forward_backward_prop(X_train[order], y_train[order], self.weights, self.dimensions, self.activation)
+            X_train = X_train[order]
+            y_train = y_train[order]
+
+            # train with mini batches
+            for mb in range(num_batches):
+                mb_start = mb * mb_size
+                mb_end = mb_start + mb_size
+                loss, _ = forward_backward_prop(X_train[mb_start:mb_end], y_train[mb_start:mb_end], self.weights, self.dimensions, self.activation)
+                epoch_loss += loss
+
+            # process validation examples 
             val_loss, _ = self.forward(X_val, y_val, self.weights, self.dimensions, self.activation)
-            history['loss'].append(loss)
+
+            # save results
+            epoch_loss /= num_batches
+            history['loss'].append(epoch_loss)
             history['val_loss'].append(val_loss)
-            print(f'Epoch[{epoch+1}/{num_epochs}]: loss = {loss}, val loss = {val_loss}')
+            print(f'Epoch[{epoch+1}/{num_epochs}]: loss = {epoch_loss}, val loss = {val_loss}')
 
             # save weights with lowest validation loss
             if best_val_loss > val_loss:
@@ -124,6 +144,6 @@ class Model():
                     print(f'Validation has not decreased in {epochs_since_val_decrease}: triggering early stopping.')
                     break
         
-        print(f'Training complete: lowest validation was {best_val_loss} at epoch {best_epoch}')
+        print(f'Training complete: lowest validation was {best_val_loss} at epoch {best_epoch+1}')
         return history
 
