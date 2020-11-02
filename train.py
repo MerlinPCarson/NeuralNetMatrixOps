@@ -64,9 +64,12 @@ def main():
     history = model.fit(X_train, y_train, X_val, y_val, num_epochs, mb_size, paitience=paitience)
 
     # determine accuracies for data sets
-    train_acc = model.evaluate(X_train, y_train)
-    val_acc = model.evaluate(X_val, y_val)
-    print(f'Training accuracy: {train_acc:.4f}, Validation accuracy: {val_acc:.4f}')
+    train_acc, train_metrics = model.evaluate(X_train, y_train)
+    val_acc, val_metrics = model.evaluate(X_val, y_val)
+    print(f'Training accuracy:   {train_acc:.4f}, precision: {train_metrics["precision"]:.4f},', \
+          f'recall: {train_metrics["recall"]:.4f}, F1: {train_metrics["f1"]:.4f}')
+    print(f'Validation accuracy: {val_acc:.4f}, precision: {val_metrics["precision"]:.4f},', \
+          f'recall: {val_metrics["recall"]:.4f}, f1: {val_metrics["f1"]:.4f}')
 
     plot_history(history)
 

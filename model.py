@@ -13,6 +13,22 @@ def one_hot_encode(labels):
     encoding = np.eye(num_labels)[labels.astype('uint8')]
     return encoding
 
+def calc_precision(preds, labels):
+    # number of true positives
+    tp = len(np.where((preds==1) & (labels[:,1]==1))[0])
+    # number of positive predictions (true positives + false positives)
+    tp_fp = np.sum(preds==1)
+
+    return tp/tp_fp
+
+def calc_recall(preds, labels):
+    # number of true positives
+    tp = np.sum(len(np.where((preds==1) & (labels[:,1]==1))[0]))
+    # number of false negatives
+    fn = len(np.where((preds==0) & (labels[:,0]==0))[0])
+
+    return tp/(tp + fn)
+    
 class ProgressBar(tqdm):
 
     def update_progress(self, block_num=1, block_size=1, total_size=None):
@@ -91,10 +107,14 @@ class Model():
         _, outputs = self.forward(X, y, self.best_weights, self.dimensions, self.activation)
         preds = np.argmax(outputs, axis=1)
 
+        precision = calc_precision(preds, y)
+        recall = calc_recall(preds, y)
+        f1 = 2*(precision*recall)/(precision+recall)
+
         # determine accuracy of predictions
         compare = [y[i, pred]==1 for i, pred in enumerate(preds)]
         accuracy = np.sum(compare)/outputs.shape[0]
-        return accuracy
+        return accuracy, {'precision': precision, 'recall': recall, 'f1':f1}
 
     def fit(self, X_train, y_train, X_val, y_val, num_epochs, mb_size, paitience=None):
 
