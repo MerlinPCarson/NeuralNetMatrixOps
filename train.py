@@ -36,9 +36,10 @@ def main():
     X_train, y_train = load_SPECT_data(train_path)
     X_val, y_val = load_SPECT_data(val_path)
 
-    dimensions = [X_train.shape[1], 10, 2]
+    dimensions = [X_train.shape[1], 50, 2]
     num_epochs = 500
     paitience = 10 
+    #paitience = None 
     lr_rate = 0.01
     model = Model(dimensions, lr_rate, activation='relu')
     history = model.fit(X_train, y_train, X_val, y_val, num_epochs, paitience=paitience)

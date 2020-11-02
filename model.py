@@ -87,12 +87,11 @@ class Model():
     def evaluate(self, X, y):
 
         # get model predictions
-        _, outputs = self.forward(X, y, self.weights, self.dimensions, self.activation)
+        _, outputs = self.forward(X, y, self.best_weights, self.dimensions, self.activation)
         preds = np.argmax(outputs, axis=1)
 
         # determine accuracy of predictions
-        preds_enc = one_hot_encode(preds)
-        compare = [preds_enc[i,0]==y[i,0] and preds_enc[i,1]==y[i,1] for i in range(y.shape[0])]
+        compare = [y[i, pred]==1 for i, pred in enumerate(preds)]
         accuracy = np.sum(compare)/outputs.shape[0]
         return accuracy
 
@@ -116,7 +115,7 @@ class Model():
                 best_val_loss = val_loss
                 best_epoch = epoch
                 epochs_since_val_decrease = 0
-                self.best_weights = self.weights
+                self.best_weights = np.copy(self.weights)
 
             # check for early stopping
             if paitience is not None:
