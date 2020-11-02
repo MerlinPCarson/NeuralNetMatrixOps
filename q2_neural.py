@@ -8,7 +8,6 @@ from q2_sigmoid import sigmoid, sigmoid_grad
 from q2_relu import relu, relu_grad
 from q2_gradcheck import gradcheck_naive
 
-
 def CE(y, y_hat):
     return(-np.sum(y * np.log(y_hat)) / len(y))
 
@@ -40,13 +39,18 @@ def forward_backward_prop(data, labels, params, dimensions, activation='sigmoid'
     ofs += H * Dy
     b2 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
 
+    num_examples = data.shape[0]
+
     # FOWARD PASS
 
     # calculate signal at hidden layer 
     z1 = data.dot(W1) + b1
 
     # calculate ouput of hidden layer 
-    a1 = sigmoid(z1)
+    if activation == 'sigmoid':
+        a1 = sigmoid(z1)
+    elif activation == 'relu':
+        a1 = relu(z1)
 
     # calculate signal at output layer
     z2 = a1.dot(W2) + b2
@@ -59,13 +63,18 @@ def forward_backward_prop(data, labels, params, dimensions, activation='sigmoid'
 
     # gradient of weights at output layer
     delta2 = a2 - labels
-    gradW2 = a1.T.dot(delta2)
-    gradb2 = np.sum(delta2, axis=0, keepdims=True)
+
+    gradW2 = a1.T.dot(delta2)/num_examples
+    gradb2 = np.sum(delta2, axis=0, keepdims=True)/num_examples
 
     # gradient of weights at hidden layer
-    delta1 = delta2.dot(W2.T) * sigmoid_grad(z1)
-    gradW1 = data.T.dot(delta1)
-    gradb1 = np.sum(delta1, axis=0, keepdims=True)
+    if activation == 'sigmoid':
+        delta1 = delta2.dot(W2.T) * sigmoid_grad(a1)
+    elif activation == 'relu':
+        delta1 = delta2.dot(W2.T) * relu_grad(a1)
+
+    gradW1 = data.T.dot(delta1)/num_examples
+    gradb1 = np.sum(delta1, axis=0, keepdims=True)/num_examples
 
     # update weights 
     W1 -= gradW1
