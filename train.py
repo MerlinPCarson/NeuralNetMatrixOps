@@ -24,10 +24,8 @@ def load_SPECT_data(path):
 
 def plot_history(history):
 
-    epochs = np.arange(1, len(history['loss'])+1, 1)
-
-    plt.plot(epochs, history['loss'], label='Training')
-    plt.plot(epochs, history['val_loss'], label='Validation')
+    plt.plot(history['loss'], label='Training')
+    plt.plot(history['val_loss'], label='Validation')
 
     plt.xlabel('epoch')
     plt.ylabel('loss')
@@ -46,24 +44,31 @@ def main():
     val_path = 'data/SPECTF.test'
 
     X_train, y_train = load_SPECT_data(train_path)
-    X_val, y_val = load_SPECT_data(val_path)
+    X_test, y_test = load_SPECT_data(val_path)
+
+    # create balanced validation set from test set 
+    X_val = X_test[-30:,:]
+    y_val = y_test[-30:]
 
     dimensions = [X_train.shape[1], 50, 2]
-    num_epochs = 100 
+    num_epochs = 1000 
     paitience = 10 
-    paitience = None 
+    #paitience = None 
     lr = 0.01
     mb_size = 16 
-    model = Model(dimensions, lr, activation='sigmoid')
+    model = Model(dimensions, lr, activation='relu')
     history = model.fit(X_train, y_train, X_val, y_val, num_epochs, mb_size, paitience=paitience)
 
     # determine accuracies for data sets
     train_acc, train_metrics = model.evaluate(X_train, y_train)
     val_acc, val_metrics = model.evaluate(X_val, y_val)
+    test_acc, test_metrics = model.evaluate(X_test, y_test)
     print(f'Training accuracy:   {train_acc:.4f}, precision: {train_metrics["precision"]:.4f},', \
           f'recall: {train_metrics["recall"]:.4f}, F1: {train_metrics["f1"]:.4f}')
     print(f'Validation accuracy: {val_acc:.4f}, precision: {val_metrics["precision"]:.4f},', \
           f'recall: {val_metrics["recall"]:.4f}, f1: {val_metrics["f1"]:.4f}')
+    print(f'Test accuracy: {test_acc:.4f}, precision: {test_metrics["precision"]:.4f},', \
+          f'recall: {test_metrics["recall"]:.4f}, f1: {test_metrics["f1"]:.4f}')
 
     plot_history(history)
 

@@ -114,12 +114,16 @@ class Model():
 
     def fit(self, X_train, y_train, X_val, y_val, num_epochs, mb_size, paitience=None):
 
-        history = {'loss': [], 'val_loss': []}
         best_val_loss = 999
         best_epoch = 0
         epochs_since_val_decrease = 0
         order = np.arange(0, X_train.shape[0], 1)
         num_batches = ceil(X_train.shape[0]/mb_size)
+
+        # epoch 0 losses, no trainning
+        loss, _ = self.forward(X_train, y_train, self.weights, self.dimensions, self.activation)
+        val_loss, _ = self.forward(X_val, y_val, self.weights, self.dimensions, self.activation)
+        history = {'loss': [loss], 'val_loss': [val_loss]}
 
         # main training loop
         for epoch in range(num_epochs):

@@ -108,8 +108,10 @@ def sanity_check():
         dimensions[1] + 1) * dimensions[2], )
 
     gradcheck_naive(lambda params: forward_backward_prop(
-        data, labels, params, dimensions), params)
+        data, labels, params, dimensions, activation='sigmoid'), params)
 
+    gradcheck_naive(lambda params: forward_backward_prop(
+        data, labels, params, dimensions, activation='relu'), params)
 
 def your_sanity_checks():
     """
