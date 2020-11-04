@@ -6,12 +6,6 @@ import matplotlib.pyplot as plt
 from model import Model, one_hot_encode
 
 
-def one_hot_encode(labels):
-    num_labels = len(np.unique(labels))
-    encoding = np.eye(num_labels)[labels.astype('uint8')]
-    return encoding
-
-
 def load_SPECT_data(path):
     data = np.genfromtxt(path, delimiter=',')
 
@@ -58,9 +52,9 @@ def main():
     num_epochs = 100 
     paitience = 10 
     paitience = None 
-    lr_rate = 0.01
+    lr = 0.01
     mb_size = 16 
-    model = Model(dimensions, lr_rate, activation='relu')
+    model = Model(dimensions, lr, activation='sigmoid')
     history = model.fit(X_train, y_train, X_val, y_val, num_epochs, mb_size, paitience=paitience)
 
     # determine accuracies for data sets

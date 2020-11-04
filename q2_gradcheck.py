@@ -31,10 +31,16 @@ def gradcheck_naive(f, x):
 
         # calculate gradient using central difference scheme
         random.setstate(rndstate)
-        f1 = f(x[ix]-h)[0]
+        grad_plus = np.copy(x)
+        grad_plus[ix] += h
+        grad_minus = np.copy(x)
+        grad_minus[ix] -= h
+        f1 = f(grad_plus)[0]
         random.setstate(rndstate)
-        f2 = f(x[ix]+h)[0]
-        numgrad = (f2-f1)/(2*h)
+        f2 = f(grad_minus)[0]
+        #f2 = f(x[ix]+h)[0]
+        #numgrad = (f2[ix]-f1[ix])/(2*h)
+        numgrad = (f1-f2)/(2*h)
 
         # Compare gradients
         reldiff = abs(numgrad - grad[ix]) / max(1, abs(numgrad), abs(grad[ix]))

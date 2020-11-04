@@ -76,12 +76,6 @@ def forward_backward_prop(data, labels, params, dimensions, activation='sigmoid'
     gradW1 = data.T.dot(delta1)/num_examples
     gradb1 = np.sum(delta1, axis=0, keepdims=True)/num_examples
 
-    # update weights 
-    W1 -= gradW1
-    b1 -= gradb1
-    W2 -= gradW2
-    b2 -= gradb2
-
     assert W1.shape == gradW1.shape
     assert W2.shape == gradW2.shape
 #    assert W3.shape == gradW3.shape

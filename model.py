@@ -36,10 +36,10 @@ class ProgressBar(tqdm):
 
 class Model():
 
-    def __init__(self, dimensions, lr_rate, activation='sigmoid'):
+    def __init__(self, dimensions, lr, activation='sigmoid'):
 
         self.dimensions = dimensions
-        self.lr_rate = lr_rate
+        self.lr = lr
         self.activation = activation
         self.glorot_weight_init(self.dimensions)
         
@@ -50,7 +50,6 @@ class Model():
         self.weights = weights[0].flatten()
         for layer in range(1, len(weights)):
             self.weights = np.concatenate((self.weights, weights[layer].flatten()))
-
 
     def forward(self, data, labels, params, dimensions, activation='sigmoid'):
         """
@@ -98,9 +97,6 @@ class Model():
 
         return cost, a2
 
-    def backward(self):
-        pass
-
     def evaluate(self, X, y):
 
         # get model predictions
@@ -138,7 +134,8 @@ class Model():
             for mb in range(num_batches):
                 mb_start = mb * mb_size
                 mb_end = mb_start + mb_size
-                loss, _ = forward_backward_prop(X_train[mb_start:mb_end], y_train[mb_start:mb_end], self.weights, self.dimensions, self.activation)
+                loss, grad = forward_backward_prop(X_train[mb_start:mb_end], y_train[mb_start:mb_end], self.weights, self.dimensions, self.activation)
+                self.weights -= self.lr * grad
                 epoch_loss += loss
 
             # process validation examples 
