@@ -95,9 +95,6 @@ def test_softmax():
     """
     print("Running your tests...")
 
-    #raise NotImplementedError
-    # END YOUR CODE
-
 
 if __name__ == "__main__":
     test_softmax_basic()
