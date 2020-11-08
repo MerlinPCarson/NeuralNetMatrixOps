@@ -32,8 +32,8 @@ def parse_args():
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
     parser.add_argument('--activation', type=str, default='sigmoid', choices=['sigmoid', 'relu'], help='activation function')
     parser.add_argument('--num_layers', type=int, default=2, choices=[1,2], help='number of hidden layers')
-    parser.add_argument('--num_neurons1', type=int, default=50, help='number of neurons in 1st hidden layer')
-    parser.add_argument('--num_neurons2', type=int, default=50, help='number of neurons in 2nd hidden layer')
+    parser.add_argument('--num_neurons1', type=int, default=30, help='number of neurons in 1st hidden layer')
+    parser.add_argument('--num_neurons2', type=int, default=15, help='number of neurons in 2nd hidden layer')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
 
     return parser.parse_args()
@@ -48,8 +48,8 @@ def main(args):
     X_test, y_test = load_SPECT_data(args.test_path)
 
     # create balanced validation set from test set 
-    X_val = X_test #[-30:,:]
-    y_val = y_test #[-30:]
+    X_val = X_test[-30:,:]
+    y_val = y_test[-30:]
 
     # instanciate model
     if args.num_layers == 1:
