@@ -78,10 +78,8 @@ def forward_backward_prop(data, labels, params, dimensions, activation='sigmoid'
 
     assert W1.shape == gradW1.shape
     assert W2.shape == gradW2.shape
-#    assert W3.shape == gradW3.shape
     assert b1.shape == gradb1.shape
     assert b2.shape == gradb2.shape
-#    assert b3.shape == gradb3.shape
 
     # Stack gradients (do not modify)
     grad = np.concatenate((gradW1.flatten(), gradb1.flatten(),
@@ -121,11 +119,6 @@ def your_sanity_checks():
     your additional tests be graded.
     """
     print("Running your sanity checks...")
-    # YOUR CODE HERE
-
-    # raise NotImplementedError
-    # END YOUR CODE
-
 
 if __name__ == "__main__":
     sanity_check()
