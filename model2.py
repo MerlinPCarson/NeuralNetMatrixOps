@@ -5,11 +5,11 @@ from math import ceil
 from q1_softmax import softmax
 from q2_sigmoid import sigmoid, sigmoid_grad
 from q2_relu import relu, relu_grad
-from q2_neural import forward_backward_prop, CE
+from q2_neural_one_more import forward_backward_prop, CE
 
 from utils import calc_precision, calc_recall
 
-class Model():
+class Model2():
 
     def __init__(self, dimensions, lr, activation='sigmoid'):
 
@@ -28,10 +28,11 @@ class Model():
 
     def forward(self, data, labels, params, dimensions, activation='sigmoid'):
         """
-        Forward propagation for a two-layer sigmoidal or ReLU network
-
+        Forward propagation for a three-layer sigmoidal or ReLU network
+    
         Compute the forward propagation and for the cross entropy cost,
-
+        and backward propagation for the gradients for all parameters.
+    
         Arguments:
         data -- M x Dx matrix, where each row is a training example.
         labels -- M x Dy matrix, where each row is a one-hot vector.
@@ -39,38 +40,51 @@ class Model():
         dimensions -- A tuple of input dimension, number of hidden units
                       and output dimension
         """
-
+    
         # Unpack network parameters (do not modify)
         ofs = 0
-        Dx, H, Dy = (dimensions[0], dimensions[1], dimensions[2])
-
-        W1 = np.reshape(params[ofs:ofs + Dx * H], (Dx, H))
-        ofs += Dx * H
-        b1 = np.reshape(params[ofs:ofs + H], (1, H))
-        ofs += H
-        W2 = np.reshape(params[ofs:ofs + H * Dy], (H, Dy))
-        ofs += H * Dy
-        b2 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
-
+        Dx, H1, H2, Dy = (dimensions[0], dimensions[1], dimensions[2], dimensions[3])
+    
+        W1 = np.reshape(params[ofs:ofs + Dx * H1], (Dx, H1))
+        ofs += Dx * H1
+        b1 = np.reshape(params[ofs:ofs + H1], (1, H1))
+        ofs += H1
+        W2 = np.reshape(params[ofs:ofs + H1 * H2], (H1, H2))
+        ofs += H1 * H2 
+        b2 = np.reshape(params[ofs:ofs + H2], (1, H2))
+        ofs += H2
+        W3 = np.reshape(params[ofs:ofs + H2 * Dy], (H2, Dy))
+        ofs += H2 * Dy
+        b3 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
+    
         # FOWARD PASS
-
-        # calculate signal at hidden layer 
+    
+        # calculate signal at 1st hidden layer 
         z1 = data.dot(W1) + b1
-
-        # calculate ouput of hidden layer 
+    
+        # calculate ouput of 1st hidden layer 
         if activation == 'sigmoid':
             a1 = sigmoid(z1)
         elif activation == 'relu':
             a1 = relu(z1)
-
-        # calculate signal at output layer
+    
+        # calculate signal at 2nd hidden layer layer
         z2 = a1.dot(W2) + b2
-        a2 = softmax(z2)
-
+    
+        # calculate ouput of 2nd hidden layer 
+        if activation == 'sigmoid':
+            a2 = sigmoid(z2)
+        elif activation == 'relu':
+            a2 = relu(z2)
+    
+        # calculate signal at output layer
+        z3 = a2.dot(W3) + b3
+        a3 = softmax(z3)
+    
         # error on from forward pass
-        cost = CE(labels, a2)
-
-        return cost, a2
+        cost = CE(labels, a3)
+    
+        return cost, a3
 
     def evaluate(self, X, y):
 
