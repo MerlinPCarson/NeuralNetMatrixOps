@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument('--num_epochs', type=int, default=100, help='number of epochs')
     parser.add_argument('--patience', type=int, default=None, help='number of epochs of no improvment before early stopping')
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
-    parser.add_argument('--activation', type=str, default='sigmoid', choices=['sigmoid', 'relu'], help='activation function')
+    parser.add_argument('--activation', type=str, default='relu', choices=['sigmoid', 'relu'], help='activation function')
     parser.add_argument('--num_layers', type=int, default=2, choices=[1,2], help='number of hidden layers')
     parser.add_argument('--num_neurons1', type=int, default=30, help='number of neurons in 1st hidden layer')
     parser.add_argument('--num_neurons2', type=int, default=15, help='number of neurons in 2nd hidden layer')
@@ -61,25 +61,6 @@ def main(args):
 
     # train model
     history = model.fit(X_train, y_train, X_val, y_val, args.num_epochs, args.batch_size, args.patience)
-
-    # determine accuracies for data sets
-    train_acc, train_metrics = model.evaluate(X_train, y_train)
-    val_acc, val_metrics = model.evaluate(X_val, y_val)
-    test_acc, test_metrics = model.evaluate(X_test, y_test)
-    print(f'Training accuracy:   {train_acc:.4f}, precision: {train_metrics["precision"]:.4f},', \
-          f'recall: {train_metrics["recall"]:.4f}, F1: {train_metrics["f1"]:.4f}')
-    print(f'Validation accuracy: {val_acc:.4f}, precision: {val_metrics["precision"]:.4f},', \
-          f'recall: {val_metrics["recall"]:.4f}, f1: {val_metrics["f1"]:.4f}')
-    print(f'Test accuracy: {test_acc:.4f}, precision: {test_metrics["precision"]:.4f},', \
-          f'recall: {test_metrics["recall"]:.4f}, f1: {test_metrics["f1"]:.4f}')
-
-    plot_history(history)
-
-    print(f'Script completed in {time.time()-start:.2f} secs')
-
-    return 0
-
-    history = model.fit(X_train, y_train, X_val, y_val, args.num_epochs, args.mb_size, args.paitience)
 
     # determine accuracies for data sets
     train_acc, train_metrics = model.evaluate(X_train, y_train)
