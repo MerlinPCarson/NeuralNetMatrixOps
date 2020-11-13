@@ -1,8 +1,8 @@
 import numpy as np
 import torch
 import copy
-
 from torch import nn
+
 
 class myConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding):
@@ -35,11 +35,10 @@ class myConv2d(nn.Module):
         kRows, kCols = kernel_size
         outRows = int((x.shape[2] - kRows)/stride[0] + 1)
         outCols = int((x.shape[3] - kCols)/stride[1] + 1)
-        output = torch.zeros((x.shape[0], 1, outRows, outCols))
-        for xi in range(x.shape[0]):
-            for colOut, colIn in enumerate(range(0, x.shape[3]-kCols+1, stride[1])):
-                for rowOut, rowIn in enumerate(range(0, x.shape[2]-kRows+1, stride[0])):
-                    output[xi, 0, rowOut, colOut] = torch.dot(x[xi, : , rowIn:rowIn+kRows, colIn:colIn+kCols].flatten(), kernel.flatten()) + bias
+        x_unf = torch.nn.functional.unfold(x, kernel_size=kernel_size, stride=stride)
+        out_unf = x_unf.transpose(1, 2).matmul(kernel.view(1, -1).t()).transpose(1, 2)
+        output = nn.functional.fold(out_unf, (outRows,outCols), (1,1)) 
+        output += bias
 
         return output
 
@@ -73,7 +72,7 @@ def conv_assert(kernel_size, stride, padding):
     assert torch.equal(b.bias, a.bias)
     
     py = a(x)
-    #print(py[:,0])
+
     my = b(x)
     assert torch.allclose(my, py, atol=1e-06), "diff: \n{}".format(my-py)
     dpy = torch.sum(py - y)
@@ -81,46 +80,44 @@ def conv_assert(kernel_size, stride, padding):
     dpy.backward()
     dmy.backward()
 
-    print(a.weight.grad.shape) 
-    print(b.weight.grad.shape) 
-    #print(a.weight)
-    #print(b.weight)
     assert np.allclose(b.weight.grad.numpy(), a.weight.grad.numpy())
     assert torch.allclose(b.weight.grad, a.weight.grad)
     assert torch.allclose(b.bias.grad, a.bias.grad)
 
-# common case
-torch.random.manual_seed(10086)
-print("common case")
-kernel_size = [2,2]
-stride = [1,1]
-padding= 0
-conv_assert(kernel_size, stride, padding)
+if __name__ == '__main__':
+    #torch.random.manual_seed(10086)
 
-# padding
-print("padding")
-kernel_size = [3,3]
-stride = [1,1]
-padding= 1
-conv_assert(kernel_size, stride, padding)
+    # common case
+    print("common case")
+    kernel_size = [2,2]
+    stride = [1,1]
+    padding= 0
+    conv_assert(kernel_size, stride, padding)
 
-# large padding
-print("large padding")
-kernel_size = [5,5]
-stride = [1,1]
-padding= 0
-conv_assert(kernel_size, stride, padding)
+    # padding
+    print("padding")
+    kernel_size = [3,3]
+    stride = [1,1]
+    padding= 1
+    conv_assert(kernel_size, stride, padding)
 
-# large stride 
-print("large stride")
-kernel_size = [3,3]
-stride = [3,3]
-padding= 1
-conv_assert(kernel_size, stride, padding)
+    # large padding
+    print("large padding")
+    kernel_size = [5,5]
+    stride = [1,1]
+    padding= 0
+    conv_assert(kernel_size, stride, padding)
 
-# uneven stride 
-print("uneven stride")
-kernel_size = [3,3]
-stride = [2,3]
-padding= 1
-conv_assert(kernel_size, stride, padding)
+    # large stride 
+    print("large stride")
+    kernel_size = [3,3]
+    stride = [3,3]
+    padding= 1
+    conv_assert(kernel_size, stride, padding)
+
+    # uneven stride 
+    print("uneven stride")
+    kernel_size = [3,3]
+    stride = [2,3]
+    padding= 1
+    conv_assert(kernel_size, stride, padding)
