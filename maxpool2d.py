@@ -14,13 +14,12 @@ class myMaxPool2d(nn.Module):
         kRows, kCols = self.kernel_size
         outRows = int((x.shape[2] - kRows)/self.stride[0] + 1)
         outCols = int((x.shape[3] - kCols)/self.stride[1] + 1)
-        output = torch.zeros((x.shape[0], x.shape[1], outRows, outCols))
 
-        for xi in range(x.shape[0]):
-            for ch in range(x.shape[1]):
-                for colOut, colIn in enumerate(range(0, x.shape[3]-kCols+1, stride[1])):
-                    for rowOut, rowIn in enumerate(range(0, x.shape[2]-kRows+1, stride[0])):
-                        output[xi,ch,rowOut,colOut] = torch.max(x[xi,ch,rowIn:rowIn+kRows,colIn:colIn+kCols])
+        x_unf = torch.nn.functional.unfold(x, kernel_size=self.kernel_size, stride=self.stride)
+        x_view = x_unf.view(x_unf.shape[0], x_unf.shape[1]//(kRows*kCols), (kRows*kCols), -1)
+        x_max = x_view.argmax(dim=2, keepdims=True)
+        max_vals = torch.gather(x_view, 2, x_max)
+        output = max_vals.view(max_vals.shape[0], max_vals.shape[1], outRows, outCols)
 
         return output
 
@@ -51,17 +50,20 @@ def maxpool_evaluate(kernel_size, stride, input, label):
     torch.sum(ref_b - label_b).backward()
     assert torch.equal(input_a.grad, input_b.grad), "gradients does not match.\na:\n{}\nb:\n{}".format(input_a, input_b)
 
+if __name__ == '__main__':
+    torch.manual_seed(42)
+    print("Evaluate non-overlapped case")
+    kernel_size=[2,2]
+    stride=[2,2]
+    #input = torch.randn(128,16,28,28, requires_grad=True)
+    #label = torch.randn(128,16,14,14)
+    input = torch.randn(3,2,3,3, requires_grad=True)
+    label = torch.randn(3,2,2,2)
+    maxpool_evaluate(kernel_size, stride, input, label)
 
-print("Evaluate non-overlapped case")
-kernel_size=[2,2]
-stride=[2,2]
-input = torch.randn(3,2,3,3, requires_grad=True)
-label = torch.randn(3,2,2,2)
-maxpool_evaluate(kernel_size, stride, input, label)
-
-print("Evaluate overlapped case")
-kernel_size=[2,2]
-stride=[1,1]
-input = torch.randn(3,2,3,3, requires_grad=True)
-label = torch.randn(3,2,1,1)
-maxpool_evaluate(kernel_size, stride, input, label)
+    print("Evaluate overlapped case")
+    kernel_size=[2,2]
+    stride=[1,1]
+    input = torch.randn(3,2,3,3, requires_grad=True)
+    label = torch.randn(3,2,1,1)
+    maxpool_evaluate(kernel_size, stride, input, label)
